@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart School Malawi</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f2f5fa;color:#172033}
+header{background:#123c70;color:white;padding:22px 15px;text-align:center}
+header h1{margin:0}
+header p{margin-bottom:0;color:#dbeafe}
+nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:18px}
+button{padding:11px 15px;border:0;border-radius:8px;background:#1769aa;color:white;font-weight:bold;cursor:pointer}
+nav button{background:#ffffff20}
+nav button:hover,button:hover{opacity:.85}
+main{max-width:1000px;margin:auto;padding:18px}
+.panel,.card{background:white;padding:18px;border-radius:12px;margin-bottom:15px;box-shadow:0 2px 8px #0000000b}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+input,select,textarea{width:100%;padding:11px;margin:6px 0 12px;border:1px solid #ccd5e1;border-radius:7px;font:inherit}
+label{font-weight:bold}
+.hidden{display:none}
+.tag{color:#1769aa;font-weight:bold;font-size:13px}
+.option{display:block;padding:10px;margin:8px 0;background:#f1f5f9;border-radius:8px}
+.option input{width:auto;margin:0 8px 0 0}
+.correct{background:#dcfce7;padding:12px;border-radius:8px}
+footer{text-align:center;padding:25px;color:#64748b}
+</style>
+</head>
+<body>
+
+<header>
+<h1>📘 Smart School Malawi</h1>
+<p>Learn • Practise • Improve</p>
+<nav>
+<button onclick="showPage('home')">Home</button>
+<button onclick="showPage('notes')">Study Notes</button>
+<button onclick="showPage('quiz')">Take Quiz</button>
+<button onclick="showPage('progress')">My Progress</button>
+<button onclick="showPage('admin')">Admin</button>
+</nav>
+</header>
+
+<main>
+<section id="home" class="page">
+<div class="panel">
+<h2>Welcome to Smart School Malawi!</h2>
+<p>Free revision notes and practice questions for Forms 1–4.</p>
+<button onclick="showPage('notes')">Start Learning</button>
+<button onclick="showPage('quiz')">Take a Quiz</button>
+</div>
+<div class="grid">
+<div class="card"><h3>📚 Study Notes</h3><p id="noteCount">0 notes</p></div>
+<div class="card"><h3>❓ Questions</h3><p id="questionCount">0 questions</p></div>
+<div class="card"><h3>🏆 Quiz Progress</h3><p id="attemptCount">0 attempts</p></div>
+</div>
+</section>
+
+<section id="notes" class="page hidden">
+<div class="panel">
+<h2>Study Notes</h2>
+<select id="formFilter" onchange="renderNotes()">
+<option value="all">All Forms</option>
+<option>Form 1</option><option>Form 2</option>
+<option>Form 3</option><option>Form 4</option>
+</select>
+<select id="subjectFilter" onchange="renderNotes()">
+<option value="all">All Subjects</option>
+<option>Mathematics</option><option>English</option>
+<option>Chemistry</option><option>Biology</option>
+<option>Physics</option><option>Agriculture</option>
+</select>
+<input id="searchNotes" placeholder="Search notes..." oninput="renderNotes()">
+</div>
+<div id="notesList" class="grid"></div>
+</section>
+
+<section id="quiz" class="page hidden">
+<div class="panel">
+<h2>Practice Quiz</h2>
+<select id="quizSubject">
+<option value="all">All Subjects</option>
+<option>Mathematics</option><option>English</option>
+<option>Chemistry</option><option>Biology</option>
+<option>Physics</option><option>Agriculture</option>
+</select>
+<button onclick="startQuiz()">Start New Quiz</button>
+</div>
+<div id="quizArea" class="panel">Choose a subject and start your quiz.</div>
+</section>
+
+<section id="progress" class="page hidden">
+<div class="panel">
+<h2>My Progress</h2>
+<p id="progressSummary">No quizzes completed yet.</p>
+<div id="history"></div>
+<button onclick="clearHistory()">Clear History</button>
+</div>
+</section>
+
+<section id="admin" class="page hidden">
+<div class="panel" id="adminLogin">
+<h2>Admin Login</h2>
+<p>Demo panel only. This passcode is not secure authentication.</p>
+<input type="password" id="adminPassword" placeholder="Admin passcode">
+<button onclick="loginAdmin()">Login</button>
+<p id="loginError"></p>
+</div>
+
+<div id="adminPanel" class="hidden">
+<div class="panel">
+<h2>Add Study Note</h2>
+<form id="noteForm">
+<label>Title</label><input id="noteTitle" required>
+<label>Form</label>
+<select id="noteFormLevel">
+<option>Form 1</option><option>Form 2</option>
+<option>Form 3</option><option>Form 4</option>
+</select>
+<label>Subject</label><input id="noteSubject" required>
+<label>Content</label><textarea id="noteBody" rows="5" required></textarea>
+<button type="submit">Save Note</button>
+</form>
+</div>
+
+<div class="panel">
+<h2>Add Quiz Question</h2>
+<form id="questionForm">
+<label>Question</label><textarea id="questionText" required></textarea>
+<label>Subject</label><input id="questionSubject" required>
+<label>Option A</label><input id="optionA" required>
+<label>Option B</label><input id="optionB" required>
+<label>Option C</label><input id="optionC" required>
+<label>Option D</label><input id="optionD" required>
+<label>Correct Answer</label>
+<select id="correctAnswer">
+<option value="0">A</option><option value="1">B</option>
+<option value="2">C</option><option value="3">D</option>
+</select>
+<label>Explanation</label><input id="explanation">
+<button type="submit">Save Question</button>
+</form>
+</div>
+<div class="panel">
+<h2>Manage Content</h2>
+<button onclick="exportData()">Export Backup</button>
+<button onclick="resetData()">Reset Sample Content</button>
+<div id="adminContent"></div>
+</div>
+</div>
+</section>
+</main>
+
+<footer>Smart School Malawi | Education for everyone</footer>
+
+<script>
+const starterNotes=[
+{id:1,form:"Form 3",subject:"Chemistry",title:"Elements, Compounds and Mixtures",body:"An element contains one type of atom, for example oxygen. A compound contains two or more elements chemically joined, for example water. A mixture contains substances physically combined, for example salt water. Filtration separates an insoluble solid from a liquid. Evaporation can recover dissolved salt from salt water."},
+{id:2,form:"Form 3",subject:"Agriculture",title:"Physical Properties of Soil",body:"Soil texture describes the relative amounts of sand, silt and clay. Soil structure describes how soil particles group into aggregates. Soil colour can give clues about organic matter and drainage. Soil contains pore spaces that hold air and water."},
+{id:3,form:"Form 3",subject:"Mathematics",title:"Factorising Quadratics",body:"To factorise x² + 7x + 6, find two numbers that multiply to 6 and add to 7. The numbers are 1 and 6. Therefore x² + 7x + 6 = (x + 1)(x + 6). For x² + x − 6, use 3 and −2: (x + 3)(x − 2)."},
+{id:4,form:"Form 1",subject:"English",title:"Nouns and Verbs",body:"A noun names a person, place, animal or thing. Examples: teacher, Malawi and book. A verb describes an action or state. Examples: run, read and is. In 'The student reads', student is a noun and reads is a verb."},
+{id:5,form:"Form 2",subject:"Biology",title:"Characteristics of Living Things",body:"Living things carry out life processes including nutrition, respiration, movement, growth, reproduction, excretion and sensitivity."},
+{id:6,form:"Form 4",subject:"Physics",title:"Force and Speed",body:"A force is a push or pull. Its SI unit is the newton (N). Speed is calculated using speed = distance ÷ time."}
+];
+
+const starterQuestions=[
+{id:1,subject:"Chemistry",q:"Which is an element?",opts:["Salt water","Oxygen","Sugar water","Soil"],a:1,ex:"Oxygen is an element."},
+{id:2,subject:"Chemistry",q:"Which method separates sand from water?",opts:["Filtration","Melting","Freezing","Magnetism"],a:0,ex:"Sand is insoluble and can be trapped by filter paper."},
+{id:3,subject:"Agriculture",q:"Soil texture depends on the amounts of...",opts:["Roots and leaves","Sand, silt and clay","Flowers and seeds","Air only"],a:1,ex:"Soil texture describes sand, silt and clay proportions."},
+{id:4,subject:"Mathematics",q:"Factorise x² + 7x + 6.",opts:["(x+2)(x+3)","(x+1)(x+6)","(x-1)(x-6)","(x+7)(x-6)"],a:1,ex:"1 × 6 = 6 and 1 + 6 = 7."},
+{id:5,subject:"English",q:"Which word is a verb: 'The girl sings'?",opts:["girl","the","sings","a"],a:2,ex:"Sings describes an action."},
+{id:6,subject:"Biology",q:"Which process releases energy from food?",opts:["Respiration","Growth","Excretion","Movement"],a:0,ex:"Respiration releases energy from food."},
+{id:7,subject:"Physics",q:"What is the SI unit of force?",opts:["Metre","Second","Newton","Kilogram"],a:2,ex:"Force is measured in newtons."}
+];
+
+let notes=[],questions=[],history=[],quiz=[],graded=false;
+function loadData(){
+try{
+const d=JSON.parse(localStorage.getItem("ssm_data"));
+notes=d&&Array.isArray(d.notes)?d.notes:starterNotes.slice();
+questions=d&&Array.isArray(d.questions)?d.questions:starterQuestions.slice();
+history=JSON.parse(localStorage.getItem("ssm_history"))||[];
+}catch(e){notes=starterNotes.slice();questions=starterQuestions.slice();history=[]}
+}
+function saveData(){localStorage.setItem("ssm_data",JSON.stringify({notes,questions}));}
+function saveHistory(){localStorage.setItem("ssm_history",JSON.stringify(history));}
+function safe(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function showPage(id){
+document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
+if(id==="notes")renderNotes();
+if(id==="progress")renderProgress();
+if(id==="admin")renderAdminContent();
+window.scrollTo(0,0);
+}
+function renderNotes(){
+const form=document.getElementById("formFilter").value;
+const subject=document.getElementById("subjectFilter").value;
+const search=document.getElementById("searchNotes").value.toLowerCase();
+const filtered=notes.filter(n=>(form==="all"||n.form===form)&&(subject==="all"||n.subject===subject)&&(n.title+" "+n.body+" "+n.subject).toLowerCase().includes(search));
+document.getElementById("notesList").innerHTML=filtered.length?filtered.map(n=>`
+<article class="card"><span class="tag">${safe(n.form)} • ${safe(n.subject)}</span>
+<h3>${safe(n.title)}</h3><p>${safe(n.body).replace(/\n/g,"<br>")}</p></article>`).join(""):"<div class='card'>No notes found.</div>";
+}
+function startQuiz(){
+const subject=document.getElementById("quizSubject").value;
+let pool=questions.filter(q=>subject==="all"||q.subject===subject);
+quiz=pool.sort(()=>Math.random()-.5).slice(0,Math.min(5,pool.length));
+graded=false;renderQuiz();
+}
+function renderQuiz(){
+const area=document.getElementById("quizArea");
+if(!quiz.length){area.innerHTML="No questions available for this subject.";return;}
+area.innerHTML=quiz.map((q,i)=>`
+<div class="card"><p><b>Question ${i+1}:</b> ${safe(q.q)}</p>
+${q.opts.map((o,j)=>`<label class="option"><input type="radio" name="q${i}" value="${j}" ${graded?"disabled":""}>${"ABCD"[j]}. ${safe(o)}</label>`).join("")}
+<div id="feedback${i}"></div></div>`).join("")+
+(graded?`<h2>Your score: ${area.dataset.score}/${quiz.length}</h2><button onclick="startQuiz()">Try Again</button>`:`<button onclick="markQuiz()">Submit Answers</button>`);
+}
+function markQuiz(){
+let score=0;
+quiz.forEach((q,i)=>{
+const chosen=document.querySelector(`input[name="q${i}"]:checked`);
+const correct=chosen&&Number(chosen.value)===q.a;
+if(correct)score++;
+document.getElementById("feedback"+i).innerHTML=`<div class="correct">${correct?"Correct!":"Correct answer: "+ "ABCD"[q.a]+". "+safe(q.opts[q.a])}<br>${safe(q.ex)}</div>`;
+});
+graded=true;
+document.getElementById("quizArea").dataset.score=score;
+history.unshift({date:new Date().toLocaleString(),score,total:quiz.length,pct:Math.round(score/quiz.length*100)});
+history=history.slice(0,50);saveHistory();renderQuiz();updateStats();
+}
+function renderProgress(){
+const total=history.length;
+const avg=total?Math.round(history.reduce((s,h)=>s+h.pct,0)/total):0;
+const best=total?Math.max(...history.map(h=>h.pct)):0;
+document.getElementById("progressSummary").innerHTML=`Attempts: <b>${total}</b> | Best score: <b>${best}%</b> | Average: <b>${avg}%</b>`;
+document.getElementById("history").innerHTML=history.length?history.map(h=>`<div class="card">${safe(h.date)} — ${h.score}/${h.total} (${h.pct}%)</div>`).join(""):"No quizzes completed yet.";
+}
+function clearHistory(){if(confirm("Clear your quiz history?")){history=[];saveHistory();renderProgress();updateStats();}}
+function updateStats(){
+document.getElementById("noteCount").textContent=notes.length+" notes";
+document.getElementById("questionCount").textContent=questions.length+" questions";
+document.getElementById("attemptCount").textContent=history.length+" attempts";
+}
+function loginAdmin(){
+if(document.getElementById("adminPassword").value==="2468"){
+document.getElementById("adminLogin").classList.add("hidden");
+document.getElementById("adminPanel").classList.remove("hidden");
+renderAdminContent();
+}else document.getElementById("loginError").textContent="Incorrect passcode.";
+}
+document.getElementById("noteForm").addEventListener("submit",e=>{
+e.preventDefault();
+notes.unshift({id:Date.now(),title:noteTitle.value,form:noteFormLevel.value,subject:noteSubject.value,body:noteBody.value});
+saveData();e.target.reset();renderNotes();renderAdminContent();updateStats();alert("Note saved on this device.");
+});
+document.getElementById("questionForm").addEventListener("submit",e=>{
+e.preventDefault();
+questions.unshift({id:Date.now(),q:questionText.value,subject:questionSubject.value,opts:[optionA.value,optionB.value,optionC.value,optionD.value],a:Number(correctAnswer.value),ex:explanation.value});
+saveData();e.target.reset();renderAdminContent();updateStats();alert("Question saved on this device.");
+});
+function renderAdminContent(){
+const el=document.getElementById("adminContent");if(!el)return;
+el.innerHTML="<h3>Notes</h3>"+notes.map(n=>`<div class="card">${safe(n.title)} <button onclick="deleteItem('note',${n.id})">Delete</button></div>`).join("")+
+"<h3>Questions</h3>"+questions.map(q=>`<div class="card">${safe(q.q)} <button onclick="deleteItem('question',${q.id})">Delete</button></div>`).join("");
+}
+function deleteItem(type,id){
+if(!confirm("Delete this item?"))return;
+if(type==="note")notes=notes.filter(n=>n.id!==id);
+else questions=questions.filter(q=>q.id!==id);
+saveData();renderAdminContent();renderNotes();updateStats();
+}
+function exportData(){
+const blob=new Blob([JSON.stringify({notes,questions},null,2)],{type:"application/json"});
+const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="smart-school-malawi-backup.json";a.click();URL.revokeObjectURL(a.href);
+}
+function resetData(){
+if(confirm("Reset notes and questions to original sample content?")){
+notes=starterNotes.slice();questions=starterQuestions.slice();saveData();renderNotes();renderAdminContent();updateStats();
+}}
+loadData();renderNotes();renderProgress();updateStats();
+</script>
+</body>
+</html>
